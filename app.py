@@ -1,5 +1,6 @@
 from uuid import uuid4
 from functools import wraps
+import os
 
 from flask import (
     flash,
@@ -98,11 +99,7 @@ def add_todo_list():
 
 @app.route("/lists/<list_id>")
 @require_list
-def show_list(lst, list_id):
-    lst = find_list_by_id(list_id, session['lists'])
-    if not lst:
-        raise NotFound(description="List not found")
-    
+def show_list(lst, list_id):    
     lst['todos'] = sort_items(lst['todos'], is_todo_completed)
     return render_template('list.html', lst=lst)
 
@@ -186,4 +183,7 @@ def update_list_title(lst, list_id):
     return redirect(url_for('show_list', list_id=list_id))
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5003)
+    if os.environ.get('FLASK_ENV') == 'production':
+        app.run(debug=False)
+    else:
+        app.run(debug=True, port=5003)
